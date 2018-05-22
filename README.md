@@ -1,46 +1,58 @@
 # HackErya
 
-都不好意思放出来了，仅仅是为了吐槽上午黑科技解决尔雅的验证码（dalao全程助攻那种）到下午就封了的那种心情
+## 食用方式
+adblock.crx
 
-## Tricky，太Tricky了
-刷完视频就有 30 分和 60%+ 的进度，这东西存在的意义就是为了刷 90% 进度去考试
+chromedriver.exe
 
-首先首先，题目对了多少不影响那 30
+填写 `username`、`password`、`fid`、`chromedriver_path`
 
-其次其次，你不选答案直接提交也是可以的！
+    pip install -r requirements.txt
+    python main.py
 
-最后最后，设置个延时就完成了
+## 坑
+
+Q: 为什么不做成 Headless Mode，这样就可以后台播放了
+
+A: [headless mode doesn't support extensions][headless mode doesn't support extensions]
+
+Q: 为什么要 Adblock 插件啊？
+
+A: `*.chaoxing.com/richvideo/initdatawithviewer*` 这条规则能屏蔽视频播放到一半弹出来的答题请求
+
+Q: 为什么他（卡住了）（停止了）（不能跳转）不会自动播放啊
+
+A:
+
+    1. 确保环境配置正常
+    2. 确保系统屏幕缩放为 100%
+    3. 查看获取到的控件坐标是否与实际横坐标相符，纵坐标因为 `screenshot` 函数只截取网页内容的缘故，与实际坐标有一段差值
+
+Q: 中间那一长段 `move_to_element_with_offset` 是什么鬼啊
+
+A:
+
+    move_by_offset(xoffset, yoffset)
+        Moving the mouse to an offset from current mouse position.
+        Args :
+            xoffset: X offset to move to, as a positive or negative integer.
+            yoffset: Y offset to move to, as a positive or negative integer.
+
+    move_to_element_with_offset(to_element, xoffset, yoffset)
+        Move the mouse by an offset of the specified element.
+        Offsets are relative to the top-left corner of the element.
+        Args :
+            to_element: The WebElement to move to.
+            xoffset: X offset to move to.
+            yoffset: Y offset to move to.
+
+为了屏蔽掉所有 **pyautogui** 的强制鼠标移动操作，先获取 top 层的 `toolOpenBtn` 坐标，再根据图片识别 Flash 控件坐标来做相应计算移动差值。**`move_by_offset` 并不能使用**
+
+## Next Version？
+更新是不能更新的了，一辈子都不可能更新的了。
+JavaScript 又不会，也就只有复制粘贴别人的代码才能维持了生活的样子。
+群里个个是 dalao，说话又好听，写代码 debug 起来一个比一个优雅。
+我敲喜欢这里的~
 
 
-## 细节，全都是细节
-requests 需要获取太多参数，我选择 selenium
-
-有个懂前端的 dalao 很重要，不然卡在 get_elements_by_xxx 都不知道怎么回事
-
-页面都跳转了，那个提交按钮嵌入在 iframe 你敢信?
-
-三层 iframe 跳转！
-
-还要提交两次！
-
-验证码在本地执行 JS 语句就能 ban 掉？
-
-### 切换至第三层 iframe
-    driver.switch_to.frame(driver.find_element_by_id("iframe"))
-    driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
-    driver.switch_to.frame(driver.find_element_by_id("frame_content"))
-### 去掉验证码流程
-    切换至第三层 iframe
-    初次提交：document.getElementsByClassName('Btn_blue_1 marleft10')[0].click()
-    出现验证码
-    切换至顶层：iframe (driver.switch_to.frame(driver.find_element_by_id("iframe"))
-    WAY.box.hide()
-    切换至第三层 iframe
-    toadd && toadd('', '')
-    确认提交：document.getElementsByClassName('bluebtn')[0].click()
-
-然后早上测试通过，下午就封了（#@￥……%￥&%YDFKGH%……T#￥%
-
-其实最后才加的 lxml，至于为什么 selenium 用不了这条正则我没搞懂：`//em[@class='orange']/../../span[@class='articlename']//@href`
-
-## 到时候补图，晚安
+[headless mode doesn't support extensions]: https://docs.google.com/document/d/1OeUik1MZb1qSQ_Dnf1kIYcyCgLYRZHg1GlZo06bsKx4/edit#
